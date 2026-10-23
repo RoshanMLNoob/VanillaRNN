@@ -49,4 +49,50 @@ class S2S_RNN(object):
     def dSigmoid(self , z):
         S = (self.sigmoid(z))
         return S*(1-S)
-        
+
+    def forward_pass(self , X , Y=None , s0=None , f1_0="relu" , f2_0="softmax" , loss=None):
+
+        func_map1 = {"relu":self.ReLU , "tanh":self.tanh , "sigmoid":self.sigmoid}
+        func_map2 = {"softmax":self.softmax , "same":self.same , "linear":self.same}
+        loss_dict = {"cross entropy":self.Loss_CE , "mse":self.Los_MSE , "squared":self.Loss_MSE}
+
+        self.f1 , self.f2 = func_map1.get(f1_0 , self.ReLU) , func_map2.get(f2_0 , self.softmax)
+
+        #Sooo X is a sequence X = {x1 , x2 , x3 , x4 ..... xT}
+
+        if s0 is None:
+            self.s = np.array(np.zeros((self.s_r , 1)) , ndmin=2) #s0
+        else:
+            self.s = np.array(s0 , ndmin=2).reshape(self.s_r , 1)
+
+        self.P = []
+        self.state = [self.s.copy()]
+        self.Zs = []
+        self.hidden_Zs = []
+        self.losses_over_t = []
+        self.Loss_f = loss_dict.get(loss , None)
+
+        for t , x_t in enumerate(list(X)):
+
+            x_t = np.array(x_t , ndmin=2).reshape(-1,1)
+
+            #Hidden Pre Activation
+            z_hidden = self.Wsx@x_t + self.Wss@self.s + self.bs
+            self.hidden_Zs.append(z_hidden)
+
+            #Now calculation transmitting sequence
+            self.s = self.f1(self.Wsx@x_t + self.Wss@self.s + self.bs) #Using Recurrence Formula
+
+            self.states.append(self.s.copy())
+
+            #Calculating the output
+            self.z = self.Wo@self.s + self.bo #This is z_t
+
+            self.P.append(self.f2(self.z)) #This is y_t being appended to output sequence Y
+            self.Zs.append(self.z)
+
+            if self.Loss_f is not None and Y is not None:
+                self.losses_over_t.append(np.sum(self.Loss_f(self.P[t],Y[t])))
+
+        return self.P
+    
