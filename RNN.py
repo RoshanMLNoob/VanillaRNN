@@ -66,7 +66,7 @@ class S2S_RNN(object):
             self.s = np.array(s0 , ndmin=2).reshape(self.s_r , 1)
 
         self.P = []
-        self.state = [self.s.copy()]
+        self.states = [self.s.copy()]
         self.Zs = []
         self.hidden_Zs = []
         self.losses_over_t = []
