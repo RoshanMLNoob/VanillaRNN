@@ -174,3 +174,40 @@ class S2S_RNN(object):
 
         return (self.dWo , self.dbo , self.dWss , self.dWsx , self.dbs) , self._loss_
 
+    def Train_RNN(self , X , Y , epoch=5 , iterations=10000 , lr = lambda t: 0.01 , f1 = "relu" , f2 = "same" , loss = "mse" , s0=None , one_hot=False , stocastic=False , interval=100 , for_pass=True):
+
+        if stocastic:
+
+            for ep in range(epoch):
+                for t in range(1 , iterations+1):
+
+                    k = np.random.choice(len(X))
+                    T = ep*iterations + t
+
+                    derivs , _loss_ = self.backward_pass(X[k] , Y[k] , for_pass=for_pass , f1=f1 , f2=f2 , loss=loss , s0=s0 ,one_hot=one_hot)
+
+                    self.Wo , self.bo = self.Wo - (lr(T)*(derivs[0])) , self.bo - (lr(T)*(derivs[1]))
+                    self.Wss , self.Wsx , self.bs = self.Wss - (lr(T)*(derivs[2])) , self.Wsx - (lr(T)*(derivs[3])) , self.bs - (lr(T)*(derivs[4]))
+
+                    if t%interval == 0:
+                        print(f"Loss at {t} : {_loss_}")
+
+            return True
+
+        elif not stocastic:
+
+            for ep in range(1,1+epoch):
+                for k in range(len(X)):
+                    t = k
+
+                    derivs , _loss_ = self.backward_pass(X[k] , Y[k] , for_pass=for_pass , f1=f1 , f2=f2 , loss=loss , s0=s0 , one_hot=one_hot)
+
+                    self.Wo , self.bo = self.Wo - (lr(T)*(derivs[0])) , self.bo - (lr(T)*(derivs[1]))
+                    self.Wss , self.Wsx , self.bs = self.Wss - (lr(T)*(derivs[2])) , self.Wsx - (lr(T)*(derivs[3])) , self.bs - (lr(T)*(derivs[4]))
+
+                    if t%interval == 0:
+                        print(f"Loss at {t} : {_loss_}")
+
+            return True
+
+
