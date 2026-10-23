@@ -23,3 +23,30 @@ class S2S_RNN(object):
         self.bo = np.array(np.zeros((vocab_size)) , ndmin=2)
 
         #zt = Wo@st + bo --> yt = softmax(zt)
+
+    def softmax(self , distribution):
+
+        shifted = distribution - np.max(distribution)
+        shifted = np.clip(shifted , -500 , 500)
+        exps = np.exp(shifted)
+        min_subbed = np.sum(exps , axis=0 , keepdims=True)
+
+        return exps / (min_subbed + 1e-15)
+    def same(self , z):
+        return z
+
+    def tanh(self , z):
+        return np.tanh(z)
+    def ReLU(self , z):
+        return np.maximum(0 , z)
+    def sigmoid(self , z):
+        return 1/(1+np.exp(-z))
+
+    def dReLU(self , z):
+        return np.where(z>0 , 1 , 0)
+    def dtanh(self , z):
+        return 1-(self.tanh(z)**2)
+    def dSigmoid(self , z):
+        S = (self.sigmoid(z))
+        return S*(1-S)
+        
