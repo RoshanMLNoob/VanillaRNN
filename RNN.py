@@ -20,7 +20,7 @@ class S2S_RNN(object):
 
         #output generators
         self.Wo = np.array(np.random.randn(vocab_size , self.s_r) , ndmin=2)*factor
-        self.bo = np.array(np.zeros((vocab_size)) , ndmin=2)
+        self.bo = np.array(np.zeros((vocab_size , 1)) , ndmin=2)
 
         #zt = Wo@st + bo --> yt = softmax(zt)
 
