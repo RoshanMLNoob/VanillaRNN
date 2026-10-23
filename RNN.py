@@ -96,3 +96,19 @@ class S2S_RNN(object):
 
         return self.P
     
+    def Loss_CE(self , p , y):
+        p = np.clip(p , 1e-15 , 1)
+        return -y*np.log(p)
+    def Loss_MSE(self , p , y):
+        return (y-p)**2
+
+    def dLoss_CE(self , p , y):
+        return -y/p
+    def dLoss_MSE(self , p , y):
+        return 2*(y-p)
+    
+    def One_Hot(self , ind , l):
+        arr = np.zeros((l , 1))
+        arr[0 , ind]  = 1
+        return arr
+        
