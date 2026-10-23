@@ -54,7 +54,7 @@ class S2S_RNN(object):
 
         func_map1 = {"relu":self.ReLU , "tanh":self.tanh , "sigmoid":self.sigmoid}
         func_map2 = {"softmax":self.softmax , "same":self.same , "linear":self.same}
-        loss_dict = {"cross entropy":self.Loss_CE , "mse":self.Los_MSE , "squared":self.Loss_MSE}
+        loss_dict = {"cross entropy":self.Loss_CE , "mse":self.Loss_MSE , "squared":self.Loss_MSE}
 
         self.f1 , self.f2 = func_map1.get(f1_0 , self.ReLU) , func_map2.get(f2_0 , self.softmax)
 
@@ -117,7 +117,7 @@ class S2S_RNN(object):
         deriv_map = {self.ReLU : self.dReLU , self.sigmoid:self.dSigmoid , self.tanh:self.dtanh}
 
         if for_pass:
-            
+
             self.forward_pass(X=X , Y=Y , s0=s0 , f1_0=f1 , f2_0=f2 , loss=loss)
             self._loss_ = np.mean(self.losses_over_t)
 
