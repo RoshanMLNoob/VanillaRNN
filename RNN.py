@@ -111,4 +111,66 @@ class S2S_RNN(object):
         arr = np.zeros((l , 1))
         arr[0 , ind]  = 1
         return arr
+
+    def backward_pass(self , X , Y , for_pass=True , f1="relu" , f2="softmax" , loss="cross entropy" , s0=None , one_hot=False):
+
+        deriv_map = {self.ReLU : self.dReLU , self.sigmoid:self.dSigmoid , self.tanh:self.dtanh}
+
+        if for_pass:
+            self.forward_pass(X=X , Y=Y , s0=s0 , f1_0=f1 , f2_0=f2 , loss=loss)
+            self._loss_ = np.mean(self.losses_over_t)
+
+        df1 = deriv_map[self.f1]
+
+        if loss.lower() in ["cross entropy" , "nll" , "mse"]: #Initializing of weights
+
+            eval_steps = min(len(self.P) , len(Y))
+
+            if not one_hot:
+
+                delta_0 = [self.P[t] - np.array(Y[t] , ndmin=2).reshape(-1,1) for t in range(eval_steps)] #idk why this comment is green
+            
+            else:
+
+                delta_0 = [self.P[t] - self.One_Hot( ind=Y[t] , l=len(self.P[t]) ) for t in range(eval_steps)]
+
+        else:
+            raise ValueError(f"Unsupported function type : {loss}")
+
         
+        #Initialization ARC
+
+        dWo , dbo= np.zeros_like(self.Wo) , np.zeros_like(self.bo) #Initialization for the w,b for output func
+
+        dWss , dWsx , dbs = np.zeros_like(self.Wo) , np.zeros_like(self.bo) #Initialization of the w,b for the recurrence formula
+
+        ds_1 = np.zeros( (self.s_r , 1) )
+
+        T = len(X)
+
+        for t in range(T-1 , -1 , -1):
+
+            x_t = np.array(X[t] , ndmin=2).reshape(-1,1)
+
+            delta_o = delta_0[t].copy()
+
+            dWo += delta_o@self.states[t+1].T
+            dbo += delta_o.copy()
+
+            ds = self.Wo.T@delta_o + ds_1
+
+            s = self.states[t+1]
+            z = self.hidden_Zs[t]
+            delta_s = ds*df1(z)
+
+            dWsx += delta_s @ x_t.T
+            dWss += delta_s @ self.states[t].T
+            dbs += delta_s.copy()
+            
+            ds_1 = self.Wss.T @ delta_s
+
+        self.dWo , self.dbo = dWo.copy() , dbo.copy()
+        self.dWss , self.dWsx , self.dbs = dWss.copy() , dWsx.copy() , dbs.copy()
+
+        return (self.dWo , self.dbo , self.dWss , self.dWsx , self.dbs) , self._loss_
+
