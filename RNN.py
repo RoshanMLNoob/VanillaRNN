@@ -143,7 +143,7 @@ class S2S_RNN(object):
 
         dWo , dbo= np.zeros_like(self.Wo) , np.zeros_like(self.bo) #Initialization for the w,b for output func
 
-        dWss , dWsx , dbs = np.zeros_like(self.Wo) , np.zeros_like(self.bo) #Initialization of the w,b for the recurrence formula
+        dWss , dWsx , dbs = np.zeros_like(self.Wss) , np.zeros_like(self.Wsx) , np.zeros_like(self.bs) #Initialization of the w,b for the recurrence formula
 
         ds_1 = np.zeros( (self.s_r , 1) )
 
