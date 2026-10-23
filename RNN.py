@@ -117,6 +117,7 @@ class S2S_RNN(object):
         deriv_map = {self.ReLU : self.dReLU , self.sigmoid:self.dSigmoid , self.tanh:self.dtanh}
 
         if for_pass:
+            
             self.forward_pass(X=X , Y=Y , s0=s0 , f1_0=f1 , f2_0=f2 , loss=loss)
             self._loss_ = np.mean(self.losses_over_t)
 
@@ -210,4 +211,20 @@ class S2S_RNN(object):
 
             return True
 
+    def save_model(self , file):
 
+        Data = (self.Wo , self.bo , self.Wsx , self.Wss , self.bs)
+
+        with open(file , "wb") as f:
+            pickle.dump(Data , f)
+
+        return True
+
+    def load_model(self , file):
+
+        with open(file , "rb") as f:
+            Data = pickle.load(f)
+
+        self.Wo , self.bo , self.Wsx , self.Wss , self.bs = Data
+
+        return True
